@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: host-pvc  # will be important for using it in a pod
+spec:  # specify which PV to claim
+  volumeName: host-pv  # this PV will be claimed (can also be claimed according to Resources i.e Dynamic Volume Provisioning)
+  accessModes:  # can specify multiple access modes
+    - ReadWriteOnce
+  storageClassName: standard  # kubectl get sc (helps to configure the type of volumes/storage used and provide fine grain control to the administrators)
+  resources:  # counterpart to capacaity used in host-pv.yaml (Request for resources required for this pvc)
+    requests:
+      storage: 1Gi  # can only request upto MAXIMUM value specified in the PV for the PVC (If we have multiple pv claims for the same pv, then we need to divide the storage capacity of the pv to different pvc so that we don't exceed the original capacity)

@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: backend
+  labels:
+    group: example
+spec:  # define and configure this service
+  selector:  # specifies which other resources to be connected to or controlled by this resource
+    app: second-app  # these are the labels of the pods defined in the deployment.yaml (this pod will be exposed by this service)
+  ports:  # exposed by service
+    - protocol: 'TCP'
+      port: 80  # outside world port that is connected(exposed) to the inside cluster
+      targetPort: 8080  # inside the container i.e our express app exposed/is listening to 8080 port
+    # - protocol: 'TCP'
+    #   port: 443
+    #   targetPort: 443
+  type: LoadBalancer  # commonly used if you want outside world access

@@ -1,0 +1,75 @@
+kind: StorageClass
+apiVersion: storage.k8s.io/v1
+metadata:
+  name: efs-sc
+provisioner: efs.csi.aws.com  # configures the storage class by using this driver
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: efs-pv
+spec:
+  capacity:
+    storage: 5Gi  # not really used here by file system (check Github Documentation)
+  volumeMode: Filesystem
+  accessModes:
+    - ReadWriteMany  # can be read and write by multiple nodes (pods)
+  storageClassName: efs-sc
+  csi:
+    driver: efs.csi.aws.com  # find in examples in official docs
+    volumeHandle:  # HERE, ADD YOUR ID OF ELASTIC FILE SYSTEM INSTANCE IN AWS
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: efs-pvc
+spec:
+  access:
+    - ReadWriteMany
+  storageClassName: efs-sc
+  resources:
+    requests:
+      storage: 5Gi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: users-service
+spec:
+  selector:
+    app: users
+  type: LoadBalancer
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 3000
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: users-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: users
+  template:
+    metadata:
+      labels:
+        app: users
+    spec:
+      containers:
+        - name: users-api
+          image: aayam07/kub-dep-users:latest
+          env:
+            - name: MONGODB_CONNECTION_URI
+              value: 'mongodb+srv://thisisleo7:gcz3vJ0VCdVOKYF5@cluster0.mm2msjs.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0'
+            - name: AUTH_API_ADDRESS
+              value: 'auth-service.default:3000'
+          volumeMounts:  # this is placing in the container
+            - name: efs-vol
+              mountPath: /app/users  # path inside of the container
+      volumes:  # this is placing in the pod
+        - name: efs-vol
+          persistentVolumeClaim:
+            claimName: efs-pvc

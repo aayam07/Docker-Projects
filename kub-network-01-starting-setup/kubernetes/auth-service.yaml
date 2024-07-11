@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: auth-service
+spec:
+  selector:
+    app: auth
+  type: ClusterIP  # will create a fixed ip address to reach this pod within the cluster, but will not expose this pod outside the cluster
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 80  # auth-api port. (auth-api) port is exposed within the cluster, not outside the cluster

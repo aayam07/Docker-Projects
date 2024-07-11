@@ -1,0 +1,35 @@
+apiVersion: apps/v1
+kind: Deployment  # kind of kubernetes object we want to create using this configuration file
+metadata:
+  name: second-app-deployment
+  labels:
+    group: example  # this key: value is upto us
+spec:  # configuration of the deployment (One type of Pod per deployment i.e can only have replicas/instances for the same pod containers per deployment)
+  replicas: 1  # can set it to 0 if you don't want any running pods initially (default is 1)
+  selector:  # specify which pods running in the cluster should be controlled by this Deployment object as it runs dynamically (i.e watches and scales up & down the pods inside it as required)
+    matchLabels:
+      app: second-app  # key and value of the labels of the pod that should be controlled (as added below)
+      tier: backend
+    # matchExpressions:
+    #   - {key: app, operator: In, values: [second-app, first-app]}  # means select those pods whose 'app' label value matches with on of the given values in the list (Can use In, NotIn, etc operators)
+  template:   # define the pods that should be created as a part of this deployment object (template of a deployment object always defines a pod object, so no need to define kind)
+    metadata:  # since pod is a new object in kubernetes, we need to specify it in a metadata
+      labels:
+        app: second-app  # can add any key and value you want (its like the name of the Pod)
+        tier: backend  # can have multiple labels for the same pod
+    spec:  # specification of individual pods which should be created in this deployment
+      containers:  # can define multiple containers in the same pod as a list
+        - name: second-node  # its a node js app (not worker node)
+          image: aayam07/kub-first-app:3
+          imagePullPolicy: Always  # always pull the latest image even if no tag is specified (or in the same previous tag)
+          livenessProbe:  # to check the health (liveness of the container inside the pods). How kubernetes should verify whether a container is up and running or not
+            httpGet:  # get http request should be sent by the kubernetes cluster to the pods running container application
+              path: /  # where to send the get req to
+              port: 8080  # to port 8080 in our container
+              # httpHeaders:
+            periodSeconds: 10  # how often this health check should be performed
+            initialDelaySeconds: 5 # how long it should wait until it checks the health for the first time
+
+
+        # - name: ... # to add multiple containers based on different images
+        #   image: ...

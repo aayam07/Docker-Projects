@@ -1,0 +1,53 @@
+version: "3.8"
+services:
+  mongodb:
+    image: 'mongo' # image name we want to use
+    volumes:
+      - data:/data/db
+    container_name: mongodb  # to force a custom container name
+    # environment:
+      # - MONGO_INITDB_ROOT_USERNAME=max
+      # MONGO_INITDB_ROOT_USERNAME: max
+      # MONGO_INITDB_ROOT_PASSWORD: secret
+    # env_file:
+    #   - ./env/mongo.env
+    # networks:
+    #   - goals-net
+  backend:
+    # image: 'goals-node'  # for already built images or images from Dockerhub
+    build: ./backend
+    # build:
+    #   context: ./backend  # path to docker file or the place where the Dockerfile is build i.e. where image will be generated
+    #   dockerfile: Dockerfile # if we named docker file differently (eg: Dockerfile-dev) 
+    #   args:  # for buildtime arguments used in Dockerfile
+    #     - name=value
+    #     some-arg: 1
+    ports:
+      - '80:80'
+    volumes:
+      - logs:/app/logs  # named volume
+      - ./backend:/app  # Bind-Mounts (can use relative path from here)
+      - /app/node_modules  # anonymous volumes
+    # env_file:
+    #   - ./env/backend.env
+    depends_on:
+      - mongodb  # name of the service this service depends on (i.e backend requires mongodb to be up and running already)
+
+  frontend:
+    build: ./frontend
+    ports:
+      - 3000:3000
+    volumes:
+      - ./frontend/src:/app/src  # BindMount
+    stdin_open: true  # tells that this service needs an open input connection
+    tty: true  # as -it is a combination of -i and -tty (attaching standard input and attaching terminal respectively)
+    depends_on:
+      - backend
+
+
+# NAMED VOLUMES (IF USED ABOVE) SHOULD BE SPECIFIED HERE LIKE SO. NO NEED FOR ANONYMOUS AND BIND MOUNTS
+volumes:
+  data:
+  logs:
+
+    

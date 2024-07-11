@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: task-service
+spec:
+  selector:
+    app: task
+  type: LoadBalancer
+  ports:
+    - protocol: TCP
+      port: 3000  # outside port
+      targetPort: 8000  # task-api port exposed

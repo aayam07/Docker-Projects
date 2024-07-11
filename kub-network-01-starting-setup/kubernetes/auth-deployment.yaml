@@ -1,0 +1,18 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: auth-deployment
+spec:
+  replicas: 1  # only one instance of a pod for a given container
+  selector:
+    matchLabels:
+      app: auth
+  template:
+    metadata:
+      labels:
+        app: auth
+    spec:
+      containers:
+        - name: auth
+          image: aayam07/kub-demo-auth:latest  # latest tag is used to ensure that always the updated image is used (or can use image pull policy to always)
+

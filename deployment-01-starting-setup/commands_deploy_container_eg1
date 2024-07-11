@@ -1,0 +1,12 @@
+Doploying a docker container app into AWS:
+
+Commands:
+
+ssh -i "docker-server-eg1.pem" ec2-user@ec2-54-221-76-140.compute-1.amazonaws.com
+
+sudo yum update -y  # update all necessary packages in the virtual cloud server 
+
+sudo amazon-linux-extras install docker
+
+sudo service docker start
+

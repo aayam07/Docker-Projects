@@ -1,0 +1,26 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: users-deployment
+spec:
+  replicas: 1  # only one instance of a pod for a given container
+  selector:
+    matchLabels:
+      app: users
+  template:
+    metadata:
+      labels:
+        app: users
+    spec:
+      containers:
+        - name: users
+          image: aayam07/kub-demo-users:latest
+          env:
+            - name: AUTH_ADDRESS
+              # value: "10.109.119.80"  # cluster internal ip address of the service in which the auth-api pod exists
+              value: "auth-service.default"  # KUBERNETES has CoreDNS feature internally to automatically assign domain names for all the services running inside its cluster as "service-name.namespace". Here default namespace is used by default
+            # - name: AUTH_ADDRESS
+            #   value: localhost  # for pod-internal communication (multiple containers inside the same pod. here, 2 containers)
+        # - name: auth
+        #   image: aayam07/kub-demo-auth:latest  # latest tag is used to ensure that always the updated image is used (or can use image pull policy to always)
+

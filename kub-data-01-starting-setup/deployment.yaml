@@ -1,0 +1,36 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: story-deployment
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: story
+  template:  # the pod template for the pods that are created by this deployment
+    metadata:
+      labels:
+        app: story
+    spec:  # specifications for the individual pods
+      containers:  # which containers will be part of this pod
+        - name: story
+          image: aayam07/kub-data-demo:2
+          env:
+            - name: STORY_FOLDER  # name of the env variable we want to use in the code
+              # value: 'story'  # as this is the folder which is bind below
+              valueFrom: 
+                configMapKeyRef:  # point at specific data key (which holds the value) in a specific configMap file
+                  name: data-store-env
+                  key: folder  # means value of the key 'folder' defined in the ConfigMap
+          volumeMounts:  # to bind/mount the created volumes to the container
+            - mountPath:  /app/story # container internal path where the volume(emptyDir/hostPath) should be mounted
+              name: story-volume  # name of the volume which we want to use in the containers internal path 
+      volumes:  # which type of volume should be created
+        - name: story-volume
+          # emptyDir: {}  # means we donot have any specific configuration for this, just use emptyDir type as it is with default settings. Survives container restarts but not pod restarts. Creates an empty directory inside the pod which can be used by all the volumes to store and access data
+          # hostPath:  # mount a path (folder/file) in the host machine to a path inside the pod so that same path can be accessed by all the replicas of the pods
+          #   path: /data # path on the host machine where the data should be stored. Can also use this to share some already existing data
+          #   type: DirectoryOrCreate  # let kubernetes know how this path should be handled (Eg: create it if it doesn't exist yet). Here, it should be an existing directory or create it if it doesn't exist yet
+          persistentVolumeClaim:
+            claimName: host-pvc
+

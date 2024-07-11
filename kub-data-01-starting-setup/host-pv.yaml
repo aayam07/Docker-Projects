@@ -1,0 +1,18 @@
+# will only work on a single node pods environemnt
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: host-pv
+spec:  # specification/configuration for this persistent volume
+  capacity:  # as an administrator we want to control how much capacity can be used by diff pods in this cluster
+    storage: 1Gi
+  volumeMode: Filesystem
+  storageClassName: standard  # kubectl get sc (helps to configure the type of volumes/storage used and provide fine grain control to the administrators)
+  accessModes:
+    - ReadWriteOnce  # multiple pods running in the same single node can claim
+    # - ReadOnlyMany  # multiple nodes can claim (not available for hostPath)
+    # - ReadWriteMany # multiple nodes can claim (not available for hostPath)
+  hostPath:  # type of persistent volume to be used (hostPath will not be independent from the node as it works only on a single node cluster)
+    path: /data
+    type: DirectoryOrCreate
+

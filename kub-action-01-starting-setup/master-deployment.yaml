@@ -1,0 +1,37 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: backend
+spec:  # define and configure this service
+  selector:  # specifies which other resources to be connected to or controlled by this resource
+    app: second-app  # these are the labels of the pods defined in the deployment.yaml (this pod will be exposed by this service)
+  ports:  # exposed by service
+    - protocol: 'TCP'
+      port: 80  # outside world port that is connected(exposed) to the inside cluster
+      targetPort: 8080  # inside the container i.e our express app exposed/is listening to 8080 port
+    # - protocol: 'TCP'
+    #   port: 443
+    #   targetPort: 443
+  type: LoadBalancer  # commonly used if you want outside world access
+---
+apiVersion: apps/v1
+kind: Deployment  # kind of kubernetes object we want to create using this configuration file
+metadata:
+  name: second-app-deployment
+spec:  # configuration of the deployment (One type of Pod per deployment i.e can only have replicas/instances for the same pod containers per deployment)
+  replicas: 1  # can set it to 0 if you don't want any running pods initially (default is 1)
+  selector:  # specify which pods running in the cluster should be controlled by this Deployment object as it runs dynamically (i.e watches and scales up & down the pods inside it as required)
+    matchLabels:
+      app: second-app  # key and value of the labels of the pod that should be controlled (as added below)
+      tier: backend
+  template:   # define the pods that should be created as a part of this deployment object (template of a deployment object always defines a pod object, so no need to define kind)
+    metadata:  # since pod is a new object in kubernetes, we need to specify it in a metadata
+      labels:
+        app: second-app  # can add any key and value you want (its like the name of the Pod)
+        tier: backend  # can have multiple labels for the same pod
+    spec:  # specification of individual pods which should be created in this deployment
+      containers:  # can define multiple containers in the same pod as a list
+        - name: second-node  # its a node js app (not worker node)
+          image: aayam07/kub-first-app:2
+        # - name: ... # to add multiple containers based on different images
+        #   image: ...
